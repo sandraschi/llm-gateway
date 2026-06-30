@@ -45,16 +45,27 @@ async def chat_completions(request: Request):
 
 
 @gateway_router.get("/v1/models")
-async def list_models():
-    """List available model IDs per registered provider."""
-    providers = list_providers()
-    return {
-        "object": "list",
-        "data": [
-            {"id": f"{p}/default", "object": "model", "created": 0, "owned_by": p}
-            for p in providers
-        ],
-    }
+async def list_models(provider: str | None = None):
+    """List available models. Filter by ?provider= to scope to one provider.
+
+    Returns live model lists from Ollama, OpenRouter, LM Studio, vLLM.
+    Returns curated defaults for Anthropic, DeepSeek, Gemini, etc.
+    """
+    from llm_gateway.base import get_adapter, list_providers
+
+    targets = [provider] if provider else list_providers()
+    all_models = []
+    for p in targets:
+        adapter = get_adapter(p)
+        if not adapter:
+            continue
+        try:
+            models = await adapter.list_models_async()
+            all_models.extend(models)
+        except Exception:
+            fallback = adapter.list_models()
+            all_models.extend(fallback)
+    return {"object": "list", "data": all_models}
 
 
 @gateway_router.get("/v1/gateway/providers")

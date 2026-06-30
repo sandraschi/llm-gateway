@@ -49,6 +49,25 @@ class BaseLLMAdapter(ABC):
     def transform_response(self, resp_data: dict[str, Any], model: str) -> dict[str, Any]:
         ...
 
+    def list_models(self) -> list[dict[str, Any]]:
+        """Return available models for this provider. Override for live listing."""
+        return [{"id": f"{self.provider}/default", "object": "model", "owned_by": self.provider}]
+
+    async def list_models_async(self) -> list[dict[str, Any]]:
+        """Async variant — default calls sync list_models(). Override for API-based listing."""
+        return self.list_models()
+
+    async def _fetch_models_via_api(self, url: str, headers: dict | None = None) -> list[dict[str, Any]]:
+        """Helper: fetch model list from an OpenAI-compatible /v1/models endpoint."""
+        try:
+            async with httpx.AsyncClient(timeout=10.0) as client:
+                resp = await client.get(url, headers=headers or {})
+                resp.raise_for_status()
+                data = resp.json()
+                return data.get("data", [])
+        except Exception:
+            return self.list_models()
+
     def build_headers(self, api_key: str) -> dict[str, str]:
         return {
             "Content-Type": "application/json",

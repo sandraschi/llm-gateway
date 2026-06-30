@@ -1,6 +1,9 @@
 """Ollama adapter — translates OpenAI ChatCompletion -> Ollama /api/chat."""
 
+import os
 from typing import Any
+
+import httpx
 
 from llm_gateway.base import BaseLLMAdapter, register_provider
 
@@ -12,8 +15,19 @@ class OllamaAdapter(BaseLLMAdapter):
     api_key_env = ""
 
     def get_base_url(self, headers: dict[str, str]) -> str:
-        import os
         return os.getenv("OLLAMA_BASE_URL", self.base_url)
+
+    async def list_models_async(self) -> list[dict[str, Any]]:
+        base = self.get_base_url({})
+        url = f"{base.rstrip('/')}/api/tags"
+        try:
+            async with httpx.AsyncClient(timeout=5.0) as client:
+                resp = await client.get(url)
+                resp.raise_for_status()
+                data = resp.json()
+                return [{"id": m["name"], "object": "model", "owned_by": "ollama"} for m in data.get("models", [])]
+        except Exception:
+            return self.list_models()
 
     def get_api_key(self, headers: dict[str, str]) -> str:
         return ""

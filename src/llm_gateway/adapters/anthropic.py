@@ -12,6 +12,16 @@ class AnthropicAdapter(BaseLLMAdapter):
     provider = "anthropic"
     base_url = "https://api.anthropic.com/v1"
     api_key_env = "ANTHROPIC_API_KEY"
+    _models = [
+        "claude-sonnet-4-20250514", "claude-sonnet-4-nightly",
+        "claude-3-7-sonnet-latest", "claude-3-7-sonnet-20250219",
+        "claude-3-5-sonnet-latest", "claude-3-5-sonnet-20241022",
+        "claude-3-5-haiku-latest", "claude-3-5-haiku-20241022",
+        "claude-3-opus-latest", "claude-3-opus-20240229",
+    ]
+
+    def list_models(self) -> list[dict[str, Any]]:
+        return [{"id": m, "object": "model", "owned_by": "anthropic"} for m in self._models]
 
     def get_api_key(self, headers: dict[str, str]) -> str:
         import os

@@ -12,6 +12,14 @@ class GeminiAdapter(BaseLLMAdapter):
     provider = "gemini"
     base_url = "https://generativelanguage.googleapis.com/v1beta"
     api_key_env = "GEMINI_API_KEY"
+    _models = [
+        "gemini-2.5-pro", "gemini-2.5-flash", "gemini-2.5-flash-lite",
+        "gemini-2.0-flash", "gemini-2.0-flash-lite",
+        "gemma-3-27b-it", "gemma-3-12b-it",
+    ]
+
+    def list_models(self) -> list[dict[str, Any]]:
+        return [{"id": m, "object": "model", "owned_by": "google"} for m in self._models]
 
     def get_api_key(self, headers: dict[str, str]) -> str:
         import os
