@@ -1,0 +1,17 @@
+[project]
+name = "llm-gateway"
+version = "0.1.0"
+description = "Lightport-compatible AI provider gateway — 28 LLM providers through one OpenAI-compatible endpoint"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi>=0.115",
+    "httpx>=0.28",
+    "uvicorn[standard]>=0.34",
+]
+
+[project.scripts]
+llm-gateway = "llm_gateway.server:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
