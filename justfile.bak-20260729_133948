@@ -1,0 +1,9 @@
+set windows-shell := ["powershell.exe", "-NoProfile", "-Command"]
+
+default: serve
+
+serve:
+    uv run llm-gateway
+
+install:
+    uv sync
