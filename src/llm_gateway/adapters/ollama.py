@@ -1,4 +1,4 @@
-"""Ollama adapter — translates OpenAI ChatCompletion -> Ollama /api/chat."""
+"""Ollama adapter - translates OpenAI ChatCompletion -> Ollama /api/chat."""
 
 import os
 from typing import Any
@@ -25,7 +25,10 @@ class OllamaAdapter(BaseLLMAdapter):
                 resp = await client.get(url)
                 resp.raise_for_status()
                 data = resp.json()
-                return [{"id": m["name"], "object": "model", "owned_by": "ollama"} for m in data.get("models", [])]
+                return [
+                    {"id": m["name"], "object": "model", "owned_by": "ollama"}
+                    for m in data.get("models", [])
+                ]
         except Exception:
             return self.list_models()
 
@@ -55,11 +58,13 @@ class OllamaAdapter(BaseLLMAdapter):
             mapped["options"]["top_p"] = body["top_p"]
         return mapped
 
-    def transform_response(self, resp_data: dict[str, Any], model: str) -> dict[str, Any]:
+    def transform_response(
+        self, resp_data: dict[str, Any], model: str
+    ) -> dict[str, Any]:
         message = resp_data.get("message", {})
         content = message.get("content", "")
         finish = resp_data.get("done_reason", "stop")
-        usage_data = resp_data.get("metrics", {})
+        resp_data.get("metrics", {})
         return self._openai_chunk(
             model=model,
             choice={
@@ -71,6 +76,9 @@ class OllamaAdapter(BaseLLMAdapter):
             usage={
                 "prompt_tokens": resp_data.get("prompt_eval_count", 0),
                 "completion_tokens": resp_data.get("eval_count", 0),
-                "total_tokens": (resp_data.get("prompt_eval_count", 0) + resp_data.get("eval_count", 0)),
+                "total_tokens": (
+                    resp_data.get("prompt_eval_count", 0)
+                    + resp_data.get("eval_count", 0)
+                ),
             },
         )

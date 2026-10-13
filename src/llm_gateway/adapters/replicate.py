@@ -1,4 +1,4 @@
-"""Replicate adapter — OpenAI-compatible."""
+"""Replicate adapter - OpenAI-compatible."""
 
 from llm_gateway.adapters.openai import OpenAIAdapter
 from llm_gateway.base import register_provider

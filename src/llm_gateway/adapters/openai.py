@@ -1,4 +1,4 @@
-"""OpenAI adapter — pass-through (already OpenAI format)."""
+"""OpenAI adapter - pass-through (already OpenAI format)."""
 
 import os
 from typing import Any
@@ -19,18 +19,26 @@ class OpenAIAdapter(BaseLLMAdapter):
         if not api_key:
             return self.list_models()
         headers = {"Authorization": f"Bearer {api_key}"}
-        return await self._fetch_models_via_api("https://api.openai.com/v1/models", headers)
+        return await self._fetch_models_via_api(
+            "https://api.openai.com/v1/models", headers
+        )
 
     def map_params(self, body: dict[str, Any]) -> dict[str, Any]:
         return body
 
-    def transform_response(self, resp_data: dict[str, Any], model: str) -> dict[str, Any]:
+    def transform_response(
+        self, resp_data: dict[str, Any], model: str
+    ) -> dict[str, Any]:
         return resp_data
 
-    async def complete(self, body: dict[str, Any], headers: dict[str, Any]) -> dict[str, Any]:
+    async def complete(
+        self, body: dict[str, Any], headers: dict[str, Any]
+    ) -> dict[str, Any]:
         api_key = self.get_api_key(headers)
         if not api_key:
-            raise ValueError("OpenAI API key not set. Set OPENAI_API_KEY env var or pass Authorization header.")
+            raise ValueError(
+                "OpenAI API key not set. Set OPENAI_API_KEY env var or pass Authorization header."
+            )
         req_headers = self.build_headers(api_key)
         url = self.build_url(self.get_base_url(headers))
 

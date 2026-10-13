@@ -1,4 +1,4 @@
-"""OpenRouter adapter — OpenAI-compatible."""
+"""OpenRouter adapter - OpenAI-compatible."""
 
 from typing import Any
 

@@ -1,4 +1,4 @@
-"""SiliconFlow adapter — OpenAI-compatible."""
+"""SiliconFlow adapter - OpenAI-compatible."""
 
 from llm_gateway.adapters.openai import OpenAIAdapter
 from llm_gateway.base import register_provider

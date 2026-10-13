@@ -1,4 +1,4 @@
-"""vLLM adapter — OpenAI-compatible local server."""
+"""vLLM adapter - OpenAI-compatible local server."""
 
 from typing import Any
 
