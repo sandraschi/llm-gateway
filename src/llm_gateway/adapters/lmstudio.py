@@ -1,4 +1,4 @@
-"""LM Studio adapter — OpenAI-compatible local server."""
+"""LM Studio adapter - OpenAI-compatible local server."""
 
 from typing import Any
 

@@ -1,4 +1,4 @@
-"""Groq adapter — OpenAI-compatible."""
+"""Groq adapter - OpenAI-compatible."""
 
 import os
 from typing import Any
@@ -18,4 +18,6 @@ class GroqAdapter(OpenAIAdapter):
         if not api_key:
             return self.list_models()
         headers = {"Authorization": f"Bearer {api_key}"}
-        return await self._fetch_models_via_api("https://api.groq.com/openai/v1/models", headers)
+        return await self._fetch_models_via_api(
+            "https://api.groq.com/openai/v1/models", headers
+        )

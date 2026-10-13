@@ -1,4 +1,4 @@
-"""Gemini adapter — translates OpenAI ChatCompletion -> Gemini generateContent."""
+"""Gemini adapter - translates OpenAI ChatCompletion -> Gemini generateContent."""
 
 from typing import Any
 
@@ -13,16 +13,23 @@ class GeminiAdapter(BaseLLMAdapter):
     base_url = "https://generativelanguage.googleapis.com/v1beta"
     api_key_env = "GEMINI_API_KEY"
     _models = [
-        "gemini-2.5-pro", "gemini-2.5-flash", "gemini-2.5-flash-lite",
-        "gemini-2.0-flash", "gemini-2.0-flash-lite",
-        "gemma-3-27b-it", "gemma-3-12b-it",
+        "gemini-2.5-pro",
+        "gemini-2.5-flash",
+        "gemini-2.5-flash-lite",
+        "gemini-2.0-flash",
+        "gemini-2.0-flash-lite",
+        "gemma-3-27b-it",
+        "gemma-3-12b-it",
     ]
 
     def list_models(self) -> list[dict[str, Any]]:
-        return [{"id": m, "object": "model", "owned_by": "google"} for m in self._models]
+        return [
+            {"id": m, "object": "model", "owned_by": "google"} for m in self._models
+        ]
 
     def get_api_key(self, headers: dict[str, str]) -> str:
         import os
+
         return os.getenv(self.api_key_env, "")
 
     def build_headers(self, api_key: str) -> dict[str, str]:
@@ -33,6 +40,7 @@ class GeminiAdapter(BaseLLMAdapter):
 
     def get_base_url(self, headers: dict[str, str]) -> str:
         import os
+
         key = os.getenv(self.api_key_env, "")
         base = os.getenv("GEMINI_BASE_URL", self.base_url)
         return f"{base}?key={key}" if key else base
@@ -46,7 +54,9 @@ class GeminiAdapter(BaseLLMAdapter):
                 system = msg.get("content", "")
             else:
                 role = "model" if msg["role"] == "assistant" else "user"
-                contents.append({"role": role, "parts": [{"text": msg.get("content", "")}]})
+                contents.append(
+                    {"role": role, "parts": [{"text": msg.get("content", "")}]}
+                )
 
         mapped: dict[str, Any] = {"contents": contents}
         if system:
@@ -62,7 +72,9 @@ class GeminiAdapter(BaseLLMAdapter):
             mapped["generationConfig"] = gen_conf
         return mapped
 
-    def transform_response(self, resp_data: dict[str, Any], model: str) -> dict[str, Any]:
+    def transform_response(
+        self, resp_data: dict[str, Any], model: str
+    ) -> dict[str, Any]:
         candidates = resp_data.get("candidates", [])
         text = ""
         finish = "stop"
@@ -74,8 +86,11 @@ class GeminiAdapter(BaseLLMAdapter):
                 text += p.get("text", "")
             finish_reason = c.get("finishReason", "")
             finish = {
-                "STOP": "stop", "MAX_TOKENS": "length", "SAFETY": "content_filter",
-                "RECITATION": "content_filter", "OTHER": "stop",
+                "STOP": "stop",
+                "MAX_TOKENS": "length",
+                "SAFETY": "content_filter",
+                "RECITATION": "content_filter",
+                "OTHER": "stop",
             }.get(finish_reason, "stop")
 
         usage = resp_data.get("usageMetadata", {})
@@ -94,7 +109,9 @@ class GeminiAdapter(BaseLLMAdapter):
             },
         )
 
-    async def complete(self, body: dict[str, Any], headers: dict[str, Any]) -> dict[str, Any]:
+    async def complete(
+        self, body: dict[str, Any], headers: dict[str, Any]
+    ) -> dict[str, Any]:
         api_key = self.get_api_key(headers)
         if not api_key:
             raise ValueError("Gemini API key not set. Set GEMINI_API_KEY env var.")

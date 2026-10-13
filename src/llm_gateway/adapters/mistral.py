@@ -1,4 +1,4 @@
-"""Mistral adapter — almost OpenAI-compatible, minor param mapping."""
+"""Mistral adapter - almost OpenAI-compatible, minor param mapping."""
 
 from llm_gateway.adapters.openai import OpenAIAdapter
 from llm_gateway.base import register_provider
