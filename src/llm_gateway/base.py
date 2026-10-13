@@ -11,9 +11,11 @@ _openai_compat_providers: dict[str, type["BaseLLMAdapter"]] = {}
 
 def register_provider(name: str):
     """Decorator to register a provider adapter."""
+
     def wrapper(cls):
         _openai_compat_providers[name] = cls
         return cls
+
     return wrapper
 
 
@@ -42,22 +44,30 @@ class BaseLLMAdapter(ABC):
         return key
 
     @abstractmethod
-    def map_params(self, body: dict[str, Any]) -> dict[str, Any]:
-        ...
+    def map_params(self, body: dict[str, Any]) -> dict[str, Any]: ...
 
     @abstractmethod
-    def transform_response(self, resp_data: dict[str, Any], model: str) -> dict[str, Any]:
-        ...
+    def transform_response(
+        self, resp_data: dict[str, Any], model: str
+    ) -> dict[str, Any]: ...
 
     def list_models(self) -> list[dict[str, Any]]:
         """Return available models for this provider. Override for live listing."""
-        return [{"id": f"{self.provider}/default", "object": "model", "owned_by": self.provider}]
+        return [
+            {
+                "id": f"{self.provider}/default",
+                "object": "model",
+                "owned_by": self.provider,
+            }
+        ]
 
     async def list_models_async(self) -> list[dict[str, Any]]:
-        """Async variant — default calls sync list_models(). Override for API-based listing."""
+        """Async variant - default calls sync list_models(). Override for API-based listing."""
         return self.list_models()
 
-    async def _fetch_models_via_api(self, url: str, headers: dict | None = None) -> list[dict[str, Any]]:
+    async def _fetch_models_via_api(
+        self, url: str, headers: dict | None = None
+    ) -> list[dict[str, Any]]:
         """Helper: fetch model list from an OpenAI-compatible /v1/models endpoint."""
         try:
             async with httpx.AsyncClient(timeout=10.0) as client:
@@ -77,7 +87,9 @@ class BaseLLMAdapter(ABC):
     def build_url(self, base_url: str) -> str:
         return f"{base_url.rstrip('/')}/v1/chat/completions"
 
-    async def complete(self, body: dict[str, Any], headers: dict[str, Any]) -> dict[str, Any]:
+    async def complete(
+        self, body: dict[str, Any], headers: dict[str, Any]
+    ) -> dict[str, Any]:
         model = body.get("model", "")
         mapped = self.map_params(body)
         api_key = self.get_api_key(headers)
@@ -91,12 +103,15 @@ class BaseLLMAdapter(ABC):
 
         return self.transform_response(data, model)
 
-    def _openai_chunk(self, model: str, choice: dict[str, Any], usage: dict[str, Any] | None = None) -> dict[str, Any]:
+    def _openai_chunk(
+        self, model: str, choice: dict[str, Any], usage: dict[str, Any] | None = None
+    ) -> dict[str, Any]:
         return {
             "id": f"chatcmpl-{uuid.uuid4().hex[:12]}",
             "object": "chat.completion",
             "created": int(time.time()),
             "model": model,
             "choices": [choice],
-            "usage": usage or {"prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0},
+            "usage": usage
+            or {"prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0},
         }

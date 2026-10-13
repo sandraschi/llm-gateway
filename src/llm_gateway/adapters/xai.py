@@ -1,4 +1,4 @@
-"""xAI (Grok) adapter — OpenAI-compatible."""
+"""xAI (Grok) adapter - OpenAI-compatible."""
 
 from typing import Any
 

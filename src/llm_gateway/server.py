@@ -31,7 +31,9 @@ app.include_router(gateway_router)
 
 @app.get("/health")
 async def health():
-    providers = __import__("llm_gateway.base", fromlist=["list_providers"]).list_providers()
+    providers = __import__(
+        "llm_gateway.base", fromlist=["list_providers"]
+    ).list_providers()
     return {"status": "ok", "service": "llm-gateway", "providers": len(providers)}
 
 
