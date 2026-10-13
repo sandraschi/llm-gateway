@@ -1,4 +1,4 @@
-"""DeepSeek adapter — OpenAI-compatible."""
+"""DeepSeek adapter - OpenAI-compatible."""
 
 from typing import Any
 
@@ -14,4 +14,6 @@ class DeepSeekAdapter(OpenAIAdapter):
     _models = ["deepseek-chat", "deepseek-reasoner"]
 
     def list_models(self) -> list[dict[str, Any]]:
-        return [{"id": m, "object": "model", "owned_by": "deepseek"} for m in self._models]
+        return [
+            {"id": m, "object": "model", "owned_by": "deepseek"} for m in self._models
+        ]

@@ -1,4 +1,4 @@
-"""AWS Bedrock adapter — sigv4 signing, Converse API."""
+"""AWS Bedrock adapter - sigv4 signing, Converse API."""
 
 import json
 from typing import Any
@@ -24,10 +24,12 @@ class BedrockAdapter(BaseLLMAdapter):
                 system = msg.get("content", "")
             else:
                 role = "assistant" if msg["role"] == "assistant" else "user"
-                bedrock_messages.append({
-                    "role": role,
-                    "content": [{"text": msg.get("content", "")}],
-                })
+                bedrock_messages.append(
+                    {
+                        "role": role,
+                        "content": [{"text": msg.get("content", "")}],
+                    }
+                )
 
         mapped = {
             "modelId": body.get("model", ""),
@@ -44,7 +46,9 @@ class BedrockAdapter(BaseLLMAdapter):
             mapped["inferenceConfig"]["topP"] = body["top_p"]
         return mapped
 
-    def transform_response(self, resp_data: dict[str, Any], model: str) -> dict[str, Any]:
+    def transform_response(
+        self, resp_data: dict[str, Any], model: str
+    ) -> dict[str, Any]:
         output = resp_data.get("output", {})
         message = output.get("message", {})
         content = ""
@@ -64,13 +68,16 @@ class BedrockAdapter(BaseLLMAdapter):
             usage={
                 "prompt_tokens": usage.get("inputTokens", 0),
                 "completion_tokens": usage.get("outputTokens", 0),
-                "total_tokens": usage.get("inputTokens", 0) + usage.get("outputTokens", 0),
+                "total_tokens": usage.get("inputTokens", 0)
+                + usage.get("outputTokens", 0),
             },
         )
 
-    async def complete(self, body: dict[str, Any], headers: dict[str, Any]) -> dict[str, Any]:
+    async def complete(
+        self, body: dict[str, Any], headers: dict[str, Any]
+    ) -> dict[str, Any]:
         import os
-        import aws4py  # pip install aws4py
+
         from aws4py import AWSRequest
 
         mapped = self.map_params(body)

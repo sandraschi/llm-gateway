@@ -1,4 +1,4 @@
-"""Cohere adapter — custom API format."""
+"""Cohere adapter - custom API format."""
 
 from typing import Any
 
@@ -21,10 +21,12 @@ class CohereAdapter(BaseLLMAdapter):
         chat_history = []
         last_msg = ""
         for msg in messages[:-1]:
-            chat_history.append({
-                "role": msg.get("role", "user"),
-                "message": msg.get("content", ""),
-            })
+            chat_history.append(
+                {
+                    "role": msg.get("role", "user"),
+                    "message": msg.get("content", ""),
+                }
+            )
         if messages:
             last_msg = messages[-1].get("content", "")
 
@@ -41,7 +43,9 @@ class CohereAdapter(BaseLLMAdapter):
             mapped["p"] = body["top_p"]
         return mapped
 
-    def transform_response(self, resp_data: dict[str, Any], model: str) -> dict[str, Any]:
+    def transform_response(
+        self, resp_data: dict[str, Any], model: str
+    ) -> dict[str, Any]:
         text = resp_data.get("text", "")
         usage = resp_data.get("usage", {})
         meta = resp_data.get("meta", {})
@@ -55,13 +59,20 @@ class CohereAdapter(BaseLLMAdapter):
                 "logprobs": None,
             },
             usage={
-                "prompt_tokens": billed.get("input_tokens", usage.get("input_tokens", 0)),
-                "completion_tokens": billed.get("output_tokens", usage.get("output_tokens", 0)),
-                "total_tokens": billed.get("input_tokens", 0) + billed.get("output_tokens", 0),
+                "prompt_tokens": billed.get(
+                    "input_tokens", usage.get("input_tokens", 0)
+                ),
+                "completion_tokens": billed.get(
+                    "output_tokens", usage.get("output_tokens", 0)
+                ),
+                "total_tokens": billed.get("input_tokens", 0)
+                + billed.get("output_tokens", 0),
             },
         )
 
-    async def complete(self, body: dict[str, Any], headers: dict[str, Any]) -> dict[str, Any]:
+    async def complete(
+        self, body: dict[str, Any], headers: dict[str, Any]
+    ) -> dict[str, Any]:
         api_key = self.get_api_key(headers)
         if not api_key:
             raise ValueError("Cohere API key not set. Set COHERE_API_KEY env var.")

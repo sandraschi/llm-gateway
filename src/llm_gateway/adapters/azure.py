@@ -1,8 +1,4 @@
-"""Azure OpenAI adapter — custom endpoint construction."""
-
-from typing import Any
-
-import httpx
+"""Azure OpenAI adapter - custom endpoint construction."""
 
 from llm_gateway.adapters.openai import OpenAIAdapter
 from llm_gateway.base import register_provider
@@ -16,6 +12,7 @@ class AzureAdapter(OpenAIAdapter):
 
     def get_base_url(self, headers: dict[str, str]) -> str:
         import os
+
         resource = os.getenv("AZURE_OPENAI_RESOURCE", "")
         deployment = os.getenv("AZURE_OPENAI_DEPLOYMENT", "gpt-4o")
         api_version = os.getenv("AZURE_OPENAI_API_VERSION", "2024-08-01-preview")

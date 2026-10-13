@@ -1,4 +1,4 @@
-"""Anthropic adapter — translates OpenAI ChatCompletion -> Anthropic Messages API."""
+"""Anthropic adapter - translates OpenAI ChatCompletion -> Anthropic Messages API."""
 
 from typing import Any
 
@@ -13,18 +13,26 @@ class AnthropicAdapter(BaseLLMAdapter):
     base_url = "https://api.anthropic.com/v1"
     api_key_env = "ANTHROPIC_API_KEY"
     _models = [
-        "claude-sonnet-4-20250514", "claude-sonnet-4-nightly",
-        "claude-3-7-sonnet-latest", "claude-3-7-sonnet-20250219",
-        "claude-3-5-sonnet-latest", "claude-3-5-sonnet-20241022",
-        "claude-3-5-haiku-latest", "claude-3-5-haiku-20241022",
-        "claude-3-opus-latest", "claude-3-opus-20240229",
+        "claude-sonnet-4-20250514",
+        "claude-sonnet-4-nightly",
+        "claude-3-7-sonnet-latest",
+        "claude-3-7-sonnet-20250219",
+        "claude-3-5-sonnet-latest",
+        "claude-3-5-sonnet-20241022",
+        "claude-3-5-haiku-latest",
+        "claude-3-5-haiku-20241022",
+        "claude-3-opus-latest",
+        "claude-3-opus-20240229",
     ]
 
     def list_models(self) -> list[dict[str, Any]]:
-        return [{"id": m, "object": "model", "owned_by": "anthropic"} for m in self._models]
+        return [
+            {"id": m, "object": "model", "owned_by": "anthropic"} for m in self._models
+        ]
 
     def get_api_key(self, headers: dict[str, str]) -> str:
         import os
+
         key = os.getenv(self.api_key_env, "")
         if not key:
             key = headers.get("x-api-key", "")
@@ -48,10 +56,12 @@ class AnthropicAdapter(BaseLLMAdapter):
             if msg.get("role") == "system":
                 system = msg.get("content", "")
             else:
-                mapped_messages.append({
-                    "role": msg["role"],
-                    "content": msg.get("content", ""),
-                })
+                mapped_messages.append(
+                    {
+                        "role": msg["role"],
+                        "content": msg.get("content", ""),
+                    }
+                )
 
         mapped = {
             "model": body.get("model", "claude-sonnet-4-20250514"),
@@ -65,10 +75,14 @@ class AnthropicAdapter(BaseLLMAdapter):
         if "top_p" in body:
             mapped["top_p"] = body["top_p"]
         if "stop" in body:
-            mapped["stop_sequences"] = body["stop"] if isinstance(body["stop"], list) else [body["stop"]]
+            mapped["stop_sequences"] = (
+                body["stop"] if isinstance(body["stop"], list) else [body["stop"]]
+            )
         return mapped
 
-    def transform_response(self, resp_data: dict[str, Any], model: str) -> dict[str, Any]:
+    def transform_response(
+        self, resp_data: dict[str, Any], model: str
+    ) -> dict[str, Any]:
         content = ""
         for block in resp_data.get("content", []):
             if block.get("type") == "text":
@@ -86,14 +100,19 @@ class AnthropicAdapter(BaseLLMAdapter):
             usage={
                 "prompt_tokens": usage.get("input_tokens", 0),
                 "completion_tokens": usage.get("output_tokens", 0),
-                "total_tokens": usage.get("input_tokens", 0) + usage.get("output_tokens", 0),
+                "total_tokens": usage.get("input_tokens", 0)
+                + usage.get("output_tokens", 0),
             },
         )
 
-    async def complete(self, body: dict[str, Any], headers: dict[str, Any]) -> dict[str, Any]:
+    async def complete(
+        self, body: dict[str, Any], headers: dict[str, Any]
+    ) -> dict[str, Any]:
         api_key = self.get_api_key(headers)
         if not api_key:
-            raise ValueError("Anthropic API key not set. Set ANTHROPIC_API_KEY env var or pass x-api-key header.")
+            raise ValueError(
+                "Anthropic API key not set. Set ANTHROPIC_API_KEY env var or pass x-api-key header."
+            )
         mapped = self.map_params(body)
         req_headers = self.build_headers(api_key)
         url = self.build_url(self.get_base_url(headers))
